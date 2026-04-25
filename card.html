@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Untuk Rere 💜</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #3b0a57, #6a0dad, #8a2be2);
+    overflow: hidden;
+}
+
+/* Progress */
+.progress {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    height: 5px;
+    display: flex;
+    gap: 5px;
+    z-index: 10;
+}
+
+.progress div {
+    flex: 1;
+    background: rgba(255,255,255,0.3);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress span {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #8a2be2, #c77dff);
+}
+
+/* Hint */
+.hint {
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    color: transparent;
+    background: linear-gradient(90deg, #8a2be2, #c77dff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: fadeHint 2s infinite;
+}
+
+@keyframes fadeHint {
+    0%,100% {opacity: 0.5}
+    50% {opacity: 1}
+}
+
+/* Page */
+.page {
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.enter-right { transform: translateX(100%); opacity: 0; }
+.enter-left { transform: translateX(-100%); opacity: 0; }
+.active { transform: translateX(0); opacity: 1; }
+.exit-left { transform: translateX(-100%); opacity: 0; }
+.exit-right { transform: translateX(100%); opacity: 0; }
+
+/* Card */
+.card {
+    max-width: 90%;
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(178,102,255,0.5),
+                0 10px 30px rgba(0,0,0,0.3);
+}
+
+.card p {
+    white-space: pre-line;
+    line-height: 1.6;
+    color: transparent;
+    background: linear-gradient(270deg, #6a0dad, #b266ff, #8a2be2);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+/* Heart */
+.heart {
+    position: fixed;
+    top: -20px;
+    font-size: 20px;
+    pointer-events: none;
+    z-index: 9999;
+    animation: fall linear forwards;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh);
+        opacity: 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="progress" id="progress"></div>
+<div id="container"></div>
+<div class="hint">Swipe → untuk lanjut</div>
+
+<audio id="bgm" autoplay loop>
+    <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const texts = [
+`Rere ini aku temen kamu, Awan.
+
+Aku sengaja bikin ini buat kamu, temen yang paling aku sayangi ❤️`,
+`Aku tau kita temenan belum lama. Tapi makasih ya buat yang udah kamu kasih ke aku. aku belum pernah ngerasa punya temen yang sesayang ini sama aku.`,
+`Rere, kamu jangan ngerasa ga punya temen. aku selalu ada ko disini buat jadi temen kamu.
+
+aku bakal selalu jadi temen kamu sampai kapanpun selamanya`,
+`Aku tau pasti kamu pernah ngerasa cape sama pertemanan ini.
+
+tapi kamu jangan nyerah yaa, aku mau kamu punya temen.
+
+aku bakal selalu sayang sama kamu biar kamu ngerasa punya temen`,
+`Jujur aku tuh paling seneng kalo dipeluk sama kamu. aku ngerasa tenang, nyaman kalo dipeluk kamu. 
+
+kamu jadi temen aku terus yaaa, biar kalo ada apa apa aku bisa cerita ke kamu`,
+`Re.. aku bakal janji aku bakal jadi temen kamu terus selamanya.
+
+biar kamu selalu ngerasa punya temen terus`,
+`setelah lulus, aku ga akan pernah ngelupain kamu, aku bakal gangguin kamu di wa setiap hari, ngajak kamu main setiap hari, biar kamu tau aku tuh bener bener sayang sama kamu sebagai temen kamu dan aku gak akan ninggalin kamu`,
+`Emang aku kadang ga bisa ngertiin apa yangg kamu mau.
+ 
+tapi Re aku selalu mau jadi yang terbaik buat kamu.
+
+maaf ya kalo aku banyak kurang sebagai temen kamu`,
+`
+Rere, aku bakal jadi temen kamu terus sampai selamanya. aku seneng temenan sama kamu ko, banget malahan. jadi jangan pernah lupain aku ya... 
+
+💜 I LOVE YOU 💜`
+];
+
+let currentPage = 0;
+const container = document.getElementById('container');
+const progress = document.getElementById('progress');
+
+/* Progress */
+texts.forEach(() => {
+    const bar = document.createElement('div');
+    const fill = document.createElement('span');
+    bar.appendChild(fill);
+    progress.appendChild(bar);
+});
+
+function updateProgress() {
+    const bars = document.querySelectorAll('.progress span');
+    bars.forEach((b, i) => {
+        b.style.width = i <= currentPage ? '100%' : '0%';
+    });
+}
+
+/* Typing */
+function typeText(el, text) {
+    el.textContent = "";
+    let i = 0;
+    function typing() {
+        if (i < text.length) {
+            el.textContent += text[i];
+            i++;
+            setTimeout(typing, 20);
+        }
+    }
+    typing();
+}
+
+/* Page */
+function showPage(index, dir='right') {
+    const old = document.querySelector('.page');
+
+    const page = document.createElement('div');
+    page.className = 'page ' + (dir==='right'?'enter-right':'enter-left');
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const text = document.createElement('p');
+    card.appendChild(text);
+
+    page.appendChild(card);
+    container.appendChild(page);
+
+    requestAnimationFrame(()=>page.classList.add('active'));
+
+    if(old){
+        old.classList.add(dir==='right'?'exit-left':'exit-right');
+        setTimeout(()=>old.remove(),400);
+    }
+
+    typeText(text, texts[index]);
+    updateProgress();
+}
+
+function nextPage(){
+    if(currentPage < texts.length-1){
+        currentPage++;
+        showPage(currentPage,'right');
+    }
+}
+
+function prevPage(){
+    if(currentPage > 0){
+        currentPage--;
+        showPage(currentPage,'left');
+    }
+}
+
+/* Swipe */
+let startX = 0;
+document.addEventListener('touchstart', e=>{
+    startX = e.touches[0].clientX;
+});
+
+document.addEventListener('touchend', e=>{
+    let endX = e.changedTouches[0].clientX;
+    if(endX < startX - 50) nextPage();
+    else if(endX > startX + 50) prevPage();
+});
+
+/* Click */
+document.addEventListener('click', e=>{
+    if(e.clientX > window.innerWidth/2) nextPage();
+    else prevPage();
+});
+
+/* Heart */
+function createHeart(){
+    const h = document.createElement('div');
+    h.className='heart';
+    h.innerHTML='💜';
+    h.style.left = Math.random()*(window.innerWidth-30)+'px';
+    h.style.animationDuration = (3+Math.random()*4)+'s';
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),7000);
+}
+setInterval(createHeart,400);
+
+/* Music fix mobile */
+const bgm = document.getElementById('bgm');
+document.addEventListener('click', ()=> bgm.play().catch(()=>{}));
+
+showPage(currentPage);
+</script>
+
+</body>
+</html>
